@@ -24,6 +24,9 @@
 ./.git/lfs/objects/24/42/24428a9fa40d5a787a96417a87db1f9c955c47a331ed8986fea60a05c776ac17
 
 
+
+./kyle_tools/.ipynb_checkpoints/*
+
 ./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.png
 ./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.mp4
 ./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.npy
