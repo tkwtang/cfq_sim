@@ -1,10 +1,6 @@
 import numpy as np
 import sys
 import os
-source_path = os.path.expanduser('~/Project/source/')
-sys.path.append(source_path)
-sys.path.append(os.path.expanduser('~/Project/source/simtools/'))
-
 from .fq_potential import fq_pot, fq_default_param
 from sus.protocol_designer import System, Protocol, Potential, Compound_Protocol
 import matplotlib.pyplot as plt
@@ -32,8 +28,8 @@ def create_system(protocol_parameter_dict, domain = None):
     - for parameters, they are arrays containing the value of the parameter at the particular time point
 
     output:
-    1. comp_prototocl
-    - the protocol for the computation system
+    1. comp_prototocl: the protocol for the computation system
+    2. storage_protocol: : the protocol for the equilibrium system
     """
     # storage protocol, just take the first and last element of each term in the protocol key from the dict to form the storage protocol
     storage_t = (protocol_parameter_dict["t"][0], protocol_parameter_dict["t"][-1])

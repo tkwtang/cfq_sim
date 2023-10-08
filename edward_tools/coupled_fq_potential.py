@@ -1,15 +1,10 @@
 import numpy as np
 import os, sys
-
-source_path = os.path.expanduser('~/Project/source/')
-sys.path.append(source_path)
 from sus.protocol_designer import System, Protocol, Potential, Compound_Protocol
+from PARAMETER_INPUT import PHI_0, x_c0
 
-
-# phi_1_prefactor = 1
-# phi_2_prefactor = 1
-PHI_0 = 2.067833848 * 1e-15
-x_c0 = PHI_0 / (2 * np.pi)
+# PHI_0 = 2.067833848 * 1e-15
+# x_c0 = PHI_0 / (2 * np.pi)
 
 def coupled_flux_qubit_pot(phi_1, phi_2, phi_1dc, phi_2dc, params, phi_1_prefactor = 1, phi_2_prefactor = 1):
     """
@@ -51,16 +46,8 @@ def coupled_flux_qubit_pot(phi_1, phi_2, phi_1dc, phi_2dc, params, phi_1_prefact
     u4_1 = delta_beta_1 * np.sin(phi_1) * np.sin(phi_1dc/2)
     u4_2 = delta_beta_2 * np.sin(phi_2) * np.sin(phi_2dc/2)
     u5 = M_12 * (phi_1 - phi_1x) * (phi_2 - phi_2x)
+
     U = U0_1 * ( u1_1 + u2_1 + u3_1 + u4_1 ) + U0_2 * ( u1_2 + u2_2 + u3_2 + u4_2 ) + np.sqrt(U0_1 * U0_2) * u5
-
-    # u5 = M_12
-    # U = U0_1 * ( u1_1 + u2_1 + u3_1 + u4_1 ) + U0_2 * ( u1_2 + u2_2 + u3_2 + u4_2 ) + u5
-
-    # print("From coupled_fq_potential.py")
-    # print("This is phi_1:", phi_1)
-    # print("This is phi_2:", phi_2)
-    # print("This is phi_1dc:", phi_1dc)
-    # print("This is phi_2dc:", phi_2dc)
 
     return U
 

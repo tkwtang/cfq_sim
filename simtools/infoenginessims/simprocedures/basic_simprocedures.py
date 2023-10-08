@@ -281,8 +281,8 @@ class MeasureAllStateDists(SimProcedure):
         return self.all_dists
 
 
-class MeasureWorkDone(SimProcedure):
-    """Written by Edward. Records the wor done for the whole step."""
+class MeasureWorkDone2(SimProcedure):
+    """Written by Edward. Records the wor done for the whole step. Wrong method"""
 
     def __init__(self, output_name='work_done', step_request=s_[:], trial_request = s_[:]):
 
@@ -327,7 +327,7 @@ class MeasureWorkDone(SimProcedure):
         print("from basic_simprocedures:", current_time, current_step)
         # simulation.work_dist_array_new += simulation.system.get_potential(current_state, next_time)
 
-class MeasureWorkDone2(SimProcedure):
+class MeasureWorkDone(SimProcedure):
     """Written by Edward. Update using the method written by Kyle."""
 
     def __init__(self, get_dW, output_name='work_done_2', step_request=s_[:], trial_request = s_[:]):
@@ -343,13 +343,13 @@ class MeasureWorkDone2(SimProcedure):
         self.simulation = simulation
         # ntrial =  simResult["cfqr"].sim.initial_state.shape[0]
         self.simulation.work_statistic_array = empty([simulation.nsteps, 2])
-        self.simulation.work_dist_array_2 = zeros(simulation.ntrials)
+        self.simulation.work_dist_array = zeros(simulation.ntrials)
 
     def do_intermediate_task(self):
         dW = self.get_val(self.simulation)
         # print(dW)
-        self.simulation.work_dist_array_2 += dW
+        self.simulation.work_dist_array += dW
         current_step = self.simulation.current_step
-        self.simulation.work_statistic_array[current_step, :] = [np.mean(self.simulation.work_dist_array_2), np.std(self.simulation.work_dist_array_2)]
+        self.simulation.work_statistic_array[current_step, :] = [np.mean(self.simulation.work_dist_array), np.std(self.simulation.work_dist_array)]
 
         # simulation.work_statistic_array[current_step] =

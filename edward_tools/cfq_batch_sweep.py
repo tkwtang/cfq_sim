@@ -27,7 +27,7 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
     """
     The main object to perform simulations.
     """
-    
+
     # base information
     start_time = time.time()
     now = str(start_time)
@@ -35,8 +35,7 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
 
     computation_protocol_parameter_dict = coupled_fq_protocol_library.customizedProtocol(initial_parameter_dict, protocol_list)
     storage_protocol, comp_protocol = create_system(computation_protocol_parameter_dict)
-    cfqr = coupled_fq_runner.coupledFluxQubitRunner(params = params, storage_protocol= storage_protocol, \
-                                    computation_protocol= comp_protocol)
+    cfqr = cfq_runner.coupledFluxQubitRunner(params = params, storage_protocol= storage_protocol,  computation_protocol= comp_protocol)
     cfqr.initialize_sim()
     cfqr.run_sim(init_state = initial_state, percentage = percentage)
     cfqr.system.protocol_list = protocol_list
@@ -59,24 +58,11 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
                                                    times = time_range, frame_skip=frameRate, color_by_state=True,
                                                    vmin = vmin, vmax = vmax,
                                                    manual_domain = manual_domain)
-    # return {
-    #     "cfqr": cfqr,
-    #     "fidelity": fidelity,
-    #     "work_distribution": cfqr.sim.work_dist_array_2, # work_dist_array_2 is for get_dW and work_dist_array is not the correct work done
-    #     "work_statistic": cfqr.sim.work_statistic_array,
-    #     "ani": ani,
-    #     "params": params,
-    #     "initial_parameter_dict": initial_parameter_dict,
-    #     "protocol_list_item": protocol_list,
-    #     "simulation_time": time.time() - start_time,
-    #     "simulation_date": datetime.date.today(),
-    #     "simulation_id": sim_id
-    # }
 
     return {
         "cfqr": cfqr,
         "fidelity": fidelity,
-        "work_distribution": cfqr.sim.work_dist_array_2, # work_dist_array_2 is for get_dW and work_dist_array is not the correct work done
+        "work_distribution": cfqr.sim.work_dist_array, # work_dist_array is for get_dW
         "work_statistic": cfqr.sim.work_statistic_array,
         "ani": ani,
         "params": params,
@@ -92,7 +78,8 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
 
 def simulateCoupledFluxQubit(params, initial_parameter_dict, protocol_list_item, init_state = False, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, frameRate = 10, verbose = False, comment = ""):
     """
-    The main object to perform simulations.
+    - The main object to perform sweep simulations.
+    - will be removed later
     """
     subStepIndex =  protocol_list_item["substepIndex"]
     sweepKey =  protocol_list_item["sweepKey"]

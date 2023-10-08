@@ -1,9 +1,8 @@
 import sys
 import os
-source_path = os.path.expanduser('~/Project/source/')
-sys.path.append(source_path)
-sys.path.append(os.path.expanduser('~/Project/source/simtools/'))
-
+# source_path = os.path.expanduser('~/Project/source/')
+# sys.path.append(source_path)
+# sys.path.append(os.path.expanduser('~/Project/source/simtools/'))
 
 import numpy as np
 from .coupled_fq_potential import coupled_fq_pot, coupled_fq_default_param
@@ -53,11 +52,6 @@ class coupledFluxQubitRunner(SimManager):
         self.system.axes_label = ["phi_1", "phi_2", "phi_1_dc", "phi_2_dc"]
         self.system.has_velocity = self.has_velocity
 
-
-        # self.system.protocol.normalize()
-        # self.system.protocol.time_stretch(np.pi/np.sqrt(1))
-
-
     def set_sim_attributes(self, init_state = None, manual_domain = None, axes = None, percentage = 0.1, verbose = True):
         if init_state is not None:
             print("use old initial_state")
@@ -104,5 +98,5 @@ class coupledFluxQubitRunner(SimManager):
         return [
             sp.ReturnFinalState(),
             sp.MeasureAllState(trial_request=np.s_[:sampleSize], step_request=np.s_[::as_step]),
-            sp.MeasureWorkDone2(rp.get_dW)
+            sp.MeasureWorkDone(rp.get_dW)
             ]
