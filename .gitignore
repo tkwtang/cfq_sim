@@ -27,22 +27,20 @@
 
 ./kyle_tools/.ipynb_checkpoints/*
 
-coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*_szilard_engine.mp4
+coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.mp4
 coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.npy
+coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.png
 
 
-./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.png
-./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.mp4
-./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.npy
-./coupled_flux_qubit_protocol/coupled_flux_qubit_initial_state/*
-./simulation_notebook/*
-./kyle_tools/original_tutorial.ipynb
-./kyle_tools/retutorial.ipynb
-./kyle_tools/tutorial-Copy1.ipynb
-./kyle_tools/tutorial-test-different-potentials.ipynb
-./kyle_tools/tutorial.ipynb
+coupled_flux_qubit_protocol/coupled_flux_qubit_initial_state/*
+simulation_notebook/*
+kyle_tools/original_tutorial.ipynb
+kyle_tools/retutorial.ipynb
+kyle_tools/tutorial-Copy1.ipynb
+kyle_tools/tutorial-test-different-potentials.ipynb
+kyle_tools/tutorial.ipynb
 
 
-./coupled_flux_qubit_protocol/myarch_mothra/*
+coupled_flux_qubit_protocol/myarch_mothra/*
 coupled_flux_qubit_protocol/myarch_mothra.zip
 ./*.npy
