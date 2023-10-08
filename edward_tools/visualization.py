@@ -161,19 +161,19 @@ def animate_sim_flux_qubit(all_state, times=[0,1], system=None, frame_skip=30, w
     #
     ani = FuncAnimation(fig, animate, interval=100, frames=len(samples), blit=False)
     #
-    if save_path and save_dict:
-        fps = 20
-        writergif = PillowWriter(fps=30)
-        ani.save(save_path, writer=writergif)
-
-        with open("coupled_flux_qubit_protocol/data.json") as f:
-            data = json.load(f)
-            save_dict["gif_save_path"] = save_path
-            data.append(save_dict)
-            with open("coupled_flux_qubit_protocol/data.json", "w+") as f_w:
-                json.dump(data, f_w)
-
-    plt.close()
+    # if save_path and save_dict:
+    #     fps = 20
+    #     writergif = PillowWriter(fps=30)
+    #     ani.save(save_path, writer=writergif)
+    #
+    #     with open("coupled_flux_qubit_protocol/data.json") as f:
+    #         data = json.load(f)
+    #         save_dict["gif_save_path"] = save_path
+    #         data.append(save_dict)
+    #         with open("coupled_flux_qubit_protocol/data.json", "w+") as f_w:
+    #             json.dump(data, f_w)
+    #
+    # plt.close()
     return ani, fig, ax
 
 

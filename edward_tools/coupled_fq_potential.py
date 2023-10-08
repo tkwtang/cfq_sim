@@ -54,7 +54,7 @@ def coupled_flux_qubit_pot(phi_1, phi_2, phi_1dc, phi_2dc, params, phi_1_prefact
 
 def coupled_flux_qubit_force(phi_1, phi_2, phi_1dc, phi_2dc, params, phi_1_prefactor = 1, phi_2_prefactor = 1):
     """
-    2D 4-well potential.
+    2D 4-well potential. Note that M_12 is already normalized with L_1 and L_2. 
 
     Parmeters
     -------------
@@ -65,7 +65,7 @@ def coupled_flux_qubit_force(phi_1, phi_2, phi_1dc, phi_2dc, params, phi_1_prefa
     - [U_0, g, beta, delta_beta, phi_x, phi_xdc ]: correspond to the energy scale, gamma
     """
 
-    U0_1, U0_2, g_1, g_2,  beta_1, beta_2, delta_beta_1, delta_beta_2, phi_1x, phi_2x , phi_1dcx, phi_2dcx, M_12, x_c = params
+    U0_1, U0_2, g_1, g_2,  beta_1, beta_2, delta_beta_1, delta_beta_2, phi_1x, phi_2x , phi_1dcx, phi_2dcx, M_12, x_c = params # M_12 is already normalized with L_1 and L_2
 
     U0_2 = U0_2 / U0_1
     U0_1 = 1

@@ -1,6 +1,6 @@
 import sys, os
 
-sys.path.append(os.path.expanduser('~/Project/source'))
+sys.path.append(os.path.expanduser('~/source'))
 from quick_sim import setup_sim
 import kyle_tools as kt
 import numpy as np
@@ -10,7 +10,7 @@ from sus.library.potentials import even_1DW, even_1DW_lifed, fredkin_pot
 
 
 
-sys.path.append(os.path.expanduser('~/Project/source/simtools/'))
+sys.path.append(os.path.expanduser('~/source/simtools/'))
 # from infoenginessims.api import *
 from infoenginessims.simprocedures import basic_simprocedures as sp
 from infoenginessims.simprocedures import running_measurements as rp

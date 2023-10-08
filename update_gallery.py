@@ -1,13 +1,13 @@
 import json, os
 
-zipFile_location = "~/Project/source/coupled_flux_qubit_protocol/myarch_mothra.zip"
+zipFile_location = "~/source/coupled_flux_qubit_protocol/myarch_mothra.zip"
 
 os.system(f"scp tkwtang@mothra.csc.ucdavis.edu:~/source/coupled_flux_qubit_protocol/myarch_mothra.zip {zipFile_location}")
 
-os.system(f"unzip -o {zipFile_location} -d ~/Project/source/coupled_flux_qubit_protocol/myarch_mothra")
+os.system(f"unzip -o {zipFile_location} -d ~/source/coupled_flux_qubit_protocol/myarch_mothra")
 
-galleryPath_local = "/Users/edwardtang/Project/source/coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery"
-galleryPath_mothra = "/Users/edwardtang/Project/source/coupled_flux_qubit_protocol/myarch_mothra"
+galleryPath_local = "/Users/edwardtang/source/coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery"
+galleryPath_mothra = "/Users/edwardtang/source/coupled_flux_qubit_protocol/myarch_mothra"
 fileArray = os.listdir(galleryPath_mothra)
 
 with open(os.path.join(galleryPath_local, "gallery.json")) as f:
