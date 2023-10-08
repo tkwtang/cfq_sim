@@ -27,10 +27,10 @@
 
 ./kyle_tools/.ipynb_checkpoints/*
 
-coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.png
-coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.mp4
-coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.npy
-coupled_flux_qubit_protocol/coupled_flux_qubit_initial_state/*
+./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.png
+./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.mp4
+./coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/*.npy
+./coupled_flux_qubit_protocol/coupled_flux_qubit_initial_state/*
 ./simulation_notebook/*
 ./kyle_tools/original_tutorial.ipynb
 ./kyle_tools/retutorial.ipynb
