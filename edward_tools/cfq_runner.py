@@ -85,14 +85,14 @@ class coupledFluxQubitRunner(SimManager):
         self.sim.reference_system = self.eq_system
         return
 
-    # def analyze_output(self):
-    #     if not hasattr(self.sim.output, 'final_W'):
-    #         final_state = self.sim.output.final_state
-    #         init_state = self.sim.initial_state
-    #         U0 = self.system.get_potential(init_state, 0) - self.eq_system.get_potential(init_state, 0)
-    #         UF = self.eq_system.get_potential(final_state, 0) - self.system.get_potential(final_state, 0)
-    #         final_W = U0 + UF
-    #         setattr(self.sim.output, 'final_W', final_W)
+    def analyze_output(self):
+        if not hasattr(self.sim.output, 'final_W'):
+            final_state = self.sim.output.final_state
+            init_state = self.sim.initial_state
+            U0 = self.system.get_potential(init_state, 0) - self.eq_system.get_potential(init_state, 0)
+            UF = self.eq_system.get_potential(final_state, 0) - self.system.get_potential(final_state, 0)
+            final_W = U0 + UF
+            setattr(self.sim.output, 'final_W', final_W)
 
     def set_simprocs(self, as_step, sampleSize):
         return [

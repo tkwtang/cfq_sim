@@ -228,6 +228,7 @@ class Simulation:
             output = procedure.do_final_task()
 
             if hasattr(procedure, 'output_name'):
+                print(procedure.output_name)
                 setattr(outputs, procedure.output_name, output)
 
         return outputs
