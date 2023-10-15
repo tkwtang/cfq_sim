@@ -67,8 +67,7 @@ class coupledFluxQubitRunner(SimManager):
         self.procs = self.set_simprocs(as_step, sampleSize)
 
         if verbose:
-            print("from cfq_runner.py, The as_tep is", as_step)
-            print("from cfq_runner.py, The dt is", self.params['dt'],)
+            print(f"from cfq_runner.py, The as_step is {as_step} and dt is {self.params['dt']}")
 
         # edward added this, to override the 200 states only in all states.
         # self.procs[1] = sp.MeasureAllState()

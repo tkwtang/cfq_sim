@@ -241,7 +241,7 @@ class System:
 
             NT = max(int((Nsample-i)/ratio), 100)
 
-        print("from system: finish the while loop.")
+        print("\nfrom system: finish the while loop in sampling.")
         state = state[0:Nsample, :, :]
         # print("the state is", state)
 

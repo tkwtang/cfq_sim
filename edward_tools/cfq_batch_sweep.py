@@ -23,7 +23,7 @@ create_simple_protocol_parameter_dict = coupled_fq_protocol_library.create_simpl
 create_system_from_storage_and_computation_protocol = coupled_fq_protocol_library.create_system_from_storage_and_computation_protocol
 mapping_state_1_to_state_2_dict = {"00": ["00", "10"], "01": ["00", "10"], "10": ["01", "11"], "11": ["01", "11"]}
 
-def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list, mapping_state_1_to_state_2_dict = mapping_state_1_to_state_2_dict, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, initial_state = None, manual_domain = None, frameRate = 10, comment = ""):
+def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list, mapping_state_1_to_state_2_dict = mapping_state_1_to_state_2_dict, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, initial_state = None, manual_domain = None, comment = ""):
     """
     The main object to perform simulations.
     """
@@ -50,21 +50,20 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
     fidelity = couple_flux_qubit_metrics.fidelityEvaluation(initial_phi_1_phi_2, final_phi_1_phi_2, mapping_state_1_to_state_2_dict)
 
     # animations
-    vmin, vmax = 0, 100
-    phi_1_dc, phi_2_dc = phi_1_dcx, phi_2_dcx
-    cfqr.system.protocol_list = protocol_list
-    time_range = (computation_protocol_parameter_dict["t"][0], computation_protocol_parameter_dict["t"][-1])
-    ani,_,_ = visualization.animate_sim_flux_qubit(all_state, system = cfqr.system ,
-                                                   times = time_range, frame_skip=frameRate, color_by_state=True,
-                                                   vmin = vmin, vmax = vmax,
-                                                   manual_domain = manual_domain)
+    # vmin, vmax = 0, 100
+    # phi_1_dc, phi_2_dc = phi_1_dcx, phi_2_dcx
+    # cfqr.system.protocol_list = protocol_list
+    # time_range = (computation_protocol_parameter_dict["t"][0], computation_protocol_parameter_dict["t"][-1])
+    # ani,_,_ = visualization.animate_sim_flux_qubit(all_state, system = cfqr.system ,
+    #                                                times = time_range, frame_skip=frame_skip, color_by_state=True,
+    #                                                vmin = vmin, vmax = vmax,
+    #                                                manual_domain = manual_domain)
 
     return {
         "cfqr": cfqr,
         "fidelity": fidelity,
         "work_distribution": cfqr.sim.work_dist_array, # work_dist_array is for get_dW
         "work_statistic": cfqr.sim.work_statistic_array,
-        "ani": ani,
         "params": params,
         "initial_parameter_dict": initial_parameter_dict,
         "protocol_list_item": protocol_list,
@@ -76,7 +75,7 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
         "comment": comment
     }
 
-def simulateCoupledFluxQubit(params, initial_parameter_dict, protocol_list_item, init_state = False, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, frameRate = 10, verbose = False, comment = ""):
+def simulateCoupledFluxQubit(params, initial_parameter_dict, protocol_list_item, init_state = False, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, frame_skip = 10, verbose = False, comment = ""):
     """
     - The main object to perform sweep simulations.
     - will be removed later
@@ -126,8 +125,8 @@ def simulateCoupledFluxQubit(params, initial_parameter_dict, protocol_list_item,
     cfqr.system.protocol_list = protocol_list
     time_range = (computation_protocol_parameter_dict["t"][0], computation_protocol_parameter_dict["t"][-1])
 
-    if frameRate > 0:
-        ani,_,_ = visualization.animate_sim_flux_qubit(all_state, system = cfqr.system , times = time_range, frame_skip=frameRate, color_by_state=True, vmin = vmin, vmax = vmax, manual_domain = manual_domain, save_path = gif_save_path, save_dict = computation_protocol_parameter_dict)
+    if frame_skip > 0:
+        ani,_,_ = visualization.animate_sim_flux_qubit(all_state, system = cfqr.system , times = time_range, frame_skip=frame_skip, color_by_state=True, vmin = vmin, vmax = vmax, manual_domain = manual_domain, save_path = gif_save_path, save_dict = computation_protocol_parameter_dict)
     else:
         ani = 0
 

@@ -152,7 +152,7 @@ def animate_sim(all_state, times=[0,1], system=None, frame_skip=30, which_axes=N
 
     else:
         fig, ax = fig_ax
-        
+
     samples = np.linspace(0, nsteps-1, nsteps)[::frame_skip]
     time = np.linspace(times[0], times[1], nsteps + 1)
     opacity=alpha
@@ -170,7 +170,7 @@ def animate_sim(all_state, times=[0,1], system=None, frame_skip=30, which_axes=N
 
     x_lim = (np.min(x), np.max(x))
     y_lim = (np.min(y), np.max(y))
-    
+
     txt = fig.suptitle('t={:.2f}'.format(times[0]))
 
     scat_kwargs = {'alpha':opacity, 'zorder':10}
@@ -185,7 +185,7 @@ def animate_sim(all_state, times=[0,1], system=None, frame_skip=30, which_axes=N
             scat = [ax.scatter(x[state_lookup[key], 0], y[state_lookup[key], 0], **scat_kwargs) for key in state_lookup]
         if legend:
             fig.legend(state_lookup)
-    
+
     if system is not None:
         pot, pout = system.show_potential(times[0], ax=ax, cbar=False, surface=False, **pot_kwargs)
         pot.title.set_visible(False)
@@ -366,7 +366,7 @@ def animate_hist_1D(all_state, total_time, which_axes=None, frame_skip=20, nbins
         h1 = ax.hist(bins[:-1], bins, weights=counts)
         ax.set_xlim(lims)
         y_max = np.max(h1[0])
-        
+
     ax.set_ylim([0, 1.2 * y_max])
 
     def animate(i):
