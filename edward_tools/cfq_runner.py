@@ -5,7 +5,8 @@ import os
 # sys.path.append(os.path.expanduser('~/Project/source/simtools/'))
 
 import numpy as np
-from .coupled_fq_potential import coupled_fq_pot, coupled_fq_default_param
+# from .coupled_fq_potential import coupled_fq_pot, coupled_fq_default_param
+
 from sus.protocol_designer import System, Protocol, Potential, Compound_Protocol
 from kyle_tools.multisim import SimManager, FillSpace
 from SimRunner import SaveParams, SaveSimOutput, SaveFinalWork
@@ -14,11 +15,13 @@ from infoenginessims.simprocedures import running_measurements as rp
 from infoenginessims.simprocedures import trajectory_measurements as tp
 from infoenginessims.simprocedures.basic_simprocedures import ReturnFinalState, MeasureWorkDone, MeasureStepValue
 from quick_sim import setup_sim
+import matplotlib.pyplot as plt
+from .initial_state_sampling import self_defined_initial_state
 
 default_params_dict = {}
 
 class coupledFluxQubitRunner(SimManager):
-    def __init__(self, potential = coupled_fq_pot, name_func = [None, None], params = default_params_dict, potential_default_param = coupled_fq_default_param, storage_protocol = None, computation_protocol = None ):
+    def __init__(self, potential = None, name_func = [None, None], params = default_params_dict, potential_default_param = None, storage_protocol = None, computation_protocol = None ,  percentage = 1, as_step = np.s_[::]):
         """
         params: parameters for the simulation such as time, lambda, theta and eta
         override_potential_parameter: to override the default parameter for the potential
@@ -31,6 +34,8 @@ class coupledFluxQubitRunner(SimManager):
         self.storage_protocol = storage_protocol
         self.computation_protocol = computation_protocol
         self.save_procs =  [SaveParams(), SaveSimOutput(), SaveFinalWork()]
+        self.sampleSize = round(self.params['N'] * percentage)
+        self.as_step = as_step
 
 
     def verify_param(self, key, val):
@@ -52,19 +57,20 @@ class coupledFluxQubitRunner(SimManager):
         self.system.axes_label = ["phi_1", "phi_2", "phi_1_dc", "phi_2_dc"]
         self.system.has_velocity = self.has_velocity
 
-    def set_sim_attributes(self, init_state = None, manual_domain = None, axes = None, percentage = 0.1, verbose = True):
+    def set_sim_attributes(self, init_state = None, manual_domain = None, axes = None, percentage = 1, as_step = np.s_[::], verbose = True, extra_constraint = None):
         if init_state is not None:
             print("use old initial_state")
             self.init_state = init_state
         else:
             print("generating new initial_state")
-            self.init_state = self.eq_system.eq_state(self.params['N'], t=0, beta=self.params['beta'], manual_domain = manual_domain, axes = axes)
+            if extra_constraint:
+                self.init_state = self_defined_initial_state(self.eq_system, self.params['N'], extra_constraint = extra_constraint)
+            else:
+                self.init_state = self.eq_system.eq_state(self.params['N'], t=0, beta=self.params['beta'], manual_domain = manual_domain, axes = axes)
 
-        as_step = max(1, int((self.system.protocol.t_f/self.params['dt'])/500))
+        print(f"as step value: {self.as_step}, sampleSize: {self.sampleSize}" )
 
-        sampleSize = round(self.params['N'] * percentage)
-
-        self.procs = self.set_simprocs(as_step, sampleSize)
+        self.procs = self.set_simprocs(self.as_step, self.sampleSize)
 
         if verbose:
             print(f"from cfq_runner.py, The as_step is {as_step} and dt is {self.params['dt']}")
@@ -85,17 +91,34 @@ class coupledFluxQubitRunner(SimManager):
         return
 
     def analyze_output(self):
-        if not hasattr(self.sim.output, 'final_W'):
-            final_state = self.sim.output.final_state
-            init_state = self.sim.initial_state
-            U0 = self.system.get_potential(init_state, 0) - self.eq_system.get_potential(init_state, 0)
-            UF = self.eq_system.get_potential(final_state, 0) - self.system.get_potential(final_state, 0)
-            final_W = U0 + UF
-            setattr(self.sim.output, 'final_W', final_W)
+        pass
+        # if not hasattr(self.sim.output.all_state["states"],  'description_text'):
+        #     self.sim.output.all_state["description_text"] = """
+        #     For all states, it is a N_sample x N_step x 4 x 2
+        #     The first dimension is the sample dimension.
+        #     The second dimension is the time step dimension.
+        #     The order of the third dimension is phi_1, phi_2, phi_1_dc and phi_2_dc
+        #     The order of the final dimension is (x, p) respectively.
+        #     """
+        #     print("For the states, ")
+
+
+        # if not hasattr(self.sim.output, 'final_W'):
+        #     final_state = self.sim.output.final_state
+        #     init_state = self.sim.initial_state
+        #     U0 = self.system.get_potential(init_state, 0) - self.eq_system.get_potential(init_state, 0)
+        #     UF = self.eq_system.get_potential(final_state, 0) - self.system.get_potential(final_state, 0)
+        #     final_W = U0 + UF
+        #     setattr(self.sim.output, 'final_W', final_W)
 
     def set_simprocs(self, as_step, sampleSize):
+        print(as_step)
         return [
             sp.ReturnFinalState(),
-            sp.MeasureAllState(trial_request=np.s_[:sampleSize], step_request=np.s_[::as_step]),
+            # sp.MeasureAllState(trial_request=np.s_[:sampleSize], step_request=as_step),
             sp.MeasureWorkDone(rp.get_dW)
             ]
+    
+    def show_initial_state(self):
+        init_state = self.init_state
+        plt.scatter(init_state[:,0,0], init_state[:,1,0])

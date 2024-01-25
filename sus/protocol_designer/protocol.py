@@ -63,6 +63,9 @@ class Protocol:
             kwargs['type'] = 'right'
         if self.interpolation == 'sigmoid':
             interpolate = self.get_sigmoid
+        if self.interpolation == 'optimal':
+            interpolate = self.get_optimal
+
 
         if t < self.t_i:
 
@@ -209,6 +212,7 @@ class Protocol:
         plt.show()
         return fig, ax
 
+
     def get_linear(self, init, final, t):
         """
         basic linear interpolation function, used internally by other methods
@@ -233,7 +237,14 @@ class Protocol:
         if type == 'right':
             return init + (final-init) * np.heaviside(t-self.t_f, 1)
 
-
+    def get_optimal(self, init, final, t):
+        """
+        basic linear interpolation function, used internally by other methods
+        """
+        total_time = self.t_f - self.t_i
+        lambda_t = init / (1 - t/total_time + np.sqrt(init / final) * (t/total_time))**2
+        lambda_t = np.nan_to_num(lambda_t, 0)
+        return lambda_t
 
 
 class Compound_Protocol(Protocol):

@@ -23,11 +23,13 @@ create_simple_protocol_parameter_dict = coupled_fq_protocol_library.create_simpl
 create_system_from_storage_and_computation_protocol = coupled_fq_protocol_library.create_system_from_storage_and_computation_protocol
 mapping_state_1_to_state_2_dict = {"00": ["00", "10"], "01": ["00", "10"], "10": ["01", "11"], "11": ["01", "11"]}
 
-def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list, mapping_state_1_to_state_2_dict = mapping_state_1_to_state_2_dict, phi_1_dcx = 0, phi_2_dcx = 0, percentage = 0.1, initial_state = None, manual_domain = None, comment = ""):
+def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list, 
+    potential = None, potential_default_param = None, 
+    mapping_state_1_to_state_2_dict = mapping_state_1_to_state_2_dict, 
+    phi_1_dcx = 0, phi_2_dcx = 0, initial_state = None, manual_domain = None, comment = "", percentage = 1, as_step = np.s_[::]):
     """
     The main object to perform simulations.
     """
-
     # base information
     start_time = time.time()
     now = str(start_time)
@@ -35,20 +37,22 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
 
     computation_protocol_parameter_dict = coupled_fq_protocol_library.customizedProtocol(initial_parameter_dict, protocol_list)
     storage_protocol, comp_protocol = create_system(computation_protocol_parameter_dict)
-    cfqr = cfq_runner.coupledFluxQubitRunner(params = params, storage_protocol= storage_protocol,  computation_protocol= comp_protocol)
+    cfqr = cfq_runner.coupledFluxQubitRunner(potential = potential, params = params, potential_default_param = potential_default_param, storage_protocol= storage_protocol,  computation_protocol= comp_protocol,  percentage = percentage, as_step = as_step)
+
+
+
     cfqr.initialize_sim()
-    cfqr.run_sim(init_state = initial_state, percentage = percentage)
+    cfqr.run_sim(init_state = initial_state) # in the multism
     cfqr.system.protocol_list = protocol_list
 
-    all_state = cfqr.sim.output.all_state['states']
+    initial_state = cfqr.init_state
     final_state = cfqr.sim.output.final_state
-    phi_1_and_phi_2_all_state = all_state[:, :, (0, 1), :]
-
     # fidelity_test
-    initial_phi_1_phi_2 = all_state[:, 0, (0, 1), :]
-    final_phi_1_phi_2   = all_state[:, -1, (0, 1), :]
+    initial_phi_1_phi_2 = initial_state[:, (0, 1), :]
+    final_phi_1_phi_2   = final_state[:, (0, 1), :]
     fidelity = couple_flux_qubit_metrics.fidelityEvaluation(initial_phi_1_phi_2, final_phi_1_phi_2, mapping_state_1_to_state_2_dict)
-
+    simulation_time = time.time() - start_time,
+    print(simulation_time)
     # animations
     # vmin, vmax = 0, 100
     # phi_1_dc, phi_2_dc = phi_1_dcx, phi_2_dcx
@@ -68,8 +72,8 @@ def simulateSingleCoupledFluxQubit(params, initial_parameter_dict, protocol_list
         "initial_parameter_dict": initial_parameter_dict,
         "protocol_list_item": protocol_list,
         "simulation_data":{
-            "simulation_time": time.time() - start_time,
-            "simulation_date": str(datetime.date.today()),
+            "simulation_time": simulation_time,
+            "simulation_date": str(datetime.datetime.now()),
             "simulation_id": sim_id
         },
         "comment": comment
@@ -244,13 +248,14 @@ def getProtocolSubstepName(protocol_list, t):
     print(time_array, cumulative_time_array, name_array[targetIndex])
 
 
-def saveSimulationResult(simResult, U0_1, timeOrStep = "time", save = False, save_final_state = False, comment = ""):
+def saveSimulationResult(simResult, U0_1, timeOrStep = "time", save = False, save_final_state = False, comment = "", saveFolderPath = "coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery"):
     """U0_1"""
     #  fidelity
     fidelity = simResult["fidelity"]
 
     # work_distribution
     work_distribution = simResult["work_distribution"]
+    mean_work = np.mean(work_distribution)
     unmodified_jarzyn = float(np.mean(np.exp(-work_distribution)))
 
     # plt.figure(figsize=(10, 7))
@@ -259,11 +264,11 @@ def saveSimulationResult(simResult, U0_1, timeOrStep = "time", save = False, sav
     fig, ax = plt.subplots(figsize=(10, 7))
     ax.hist(work_distribution, bins = 30)
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(0.05, 0.95, f"Jarzyn: {unmodified_jarzyn: .3g}", transform=ax.transAxes, fontsize=14, verticalalignment='top',bbox=props)
+    ax.text(0.05, 0.95, f"mean work: {mean_work: .3g}, Jarzyn: {unmodified_jarzyn: .3g}", transform=ax.transAxes, fontsize=14, verticalalignment='top',bbox=props)
     # plt.hist(work_distribution)
     if save:
-        np.save(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_work_distribution.npy', work_distribution)
-        plt.savefig(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_work_distribution.png')
+        np.save(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_work_distribution.npy', work_distribution)
+        plt.savefig(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_work_distribution.png')
         pass
 
     # work statistics
@@ -283,23 +288,23 @@ def saveSimulationResult(simResult, U0_1, timeOrStep = "time", save = False, sav
         plt.vlines(x=_t, ymin = np.min(work_mean), ymax = np.max(work_mean), ls="--", colors = "purple")
 
     if save:
-        np.save(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_work_statistic.npy', work_statistic)
-        plt.savefig(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_work_statistic.png')
+        np.save(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_work_statistic.npy', work_statistic)
+        plt.savefig(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_work_statistic.png')
         pass
 
 
     if save_final_state:
         final_state = simResult["cfqr"].sim.output.final_state
-        np.save(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_final_state.npy', final_state)
+        np.save(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_final_state.npy', final_state)
 
         plt.figure(figsize=(10, 7))
         plt.scatter(final_state[:, 0, 0], final_state[:, 1, 0])
-        plt.savefig(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_final_state.png')
+        plt.savefig(f'{saveFolderPath}/{simResult["simulation_data"]["simulation_id"]}_final_state.png')
 
 
-    FFwriter = animation.FFMpegWriter(fps=10)
-    if save:
-        simResult["ani"].save(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_szilard_engine.mp4', writer = FFwriter)
+    # FFwriter = animation.FFMpegWriter(fps=10)
+    # if save:
+    #     simResult["ani"].save(f'coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/{simResult["simulation_data"]["simulation_id"]}_szilard_engine.mp4', writer = FFwriter)
 
     simResult["simulation_data"]["simulation_computer"] = socket.gethostname()
     simResult["simulation_data"]["saveTime"] = str(datetime.datetime.timestamp( datetime.datetime.now()))
@@ -311,14 +316,16 @@ def saveSimulationResult(simResult, U0_1, timeOrStep = "time", save = False, sav
         "protocol_list_item":            simResult["protocol_list_item"],
         "simulation_data":                simResult["simulation_data"],
         "jarzynski_term":                 unmodified_jarzyn,
+        "mean_work":                      mean_work,
         "fidelity":                             simResult["fidelity"],
         "comment":                             simResult["comment"]
     }
 
     saveData["params"]["sim_params"] = [list(item) for item in simResult["params"]["sim_params"]]
 
-    with open("coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/gallery.json") as f:
+    with open(f"{saveFolderPath}/gallery.json") as f:
         jsonData = json.load(f)
         jsonData.append(saveData)
-        with open("coupled_flux_qubit_protocol/coupled_flux_qubit_data_gallery/gallery.json", "w+") as fw:
+        with open(f"{saveFolderPath}/gallery.json", "w+") as fw:
             json.dump(jsonData, fw, cls = NumpyArrayEncoder)
+

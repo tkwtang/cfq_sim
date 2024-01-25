@@ -13,6 +13,40 @@ def fidelityEvaluation(state_1, state_2, mapping_state_1_to_state_2_dict = None)
     # above mapping_state_1_to_state_2_dict
     state_1_index = separate_by_state_2(state_1)
     state_2_index = separate_by_state_2(state_2)
+    bit_array = ["00", "01", "10", "11"]
+    fidelityInformation = []
+    fidelitySummaryText = ""
+
+    for key, destination_list in mapping_state_1_to_state_2_dict.items():
+        initial_count = np.sum(state_1_index[key])
+        goodNumber = 0
+        fidelityItem = {"initial": [0, 0, 0, 0] , "final": [0, 0, 0, 0], "final_percentage": [0, 0, 0, 0] }
+        fidelityItem["initial"][bit_array.index(key)] = int(np.sum(state_1_index[key])) # to indicate the intiial position
+
+
+        for location in bit_array: # location is the final position that we want the particle to land on
+            final_count = np.sum(np.all(np.vstack([state_1_index[key], state_2_index[location]]), axis=0))
+            fidelityItem["final"][bit_array.index(location)] = int(final_count) # to indicate
+            
+            if initial_count == 0:
+                percentage = np.nan
+            else:
+                percentage = final_count / initial_count
+            
+            fidelityItem["final_percentage"][bit_array.index(location)] = '{:,.3f}'.format(percentage) # to indicate
+
+            # fidelityItem["final"].append({"location": location, "count": int(final_count)})
+            # print(f"initial: {key} ({initial_count}), final: {location} ({final_count})")
+        fidelityInformation.append(fidelityItem)
+    return fidelityInformation
+
+def fidelityEvaluationOld(state_1, state_2, mapping_state_1_to_state_2_dict = None):
+    # input: a list to define what are successful transitions
+    # e.g. {"01": [11], "00": [10], "10": [10], "11": [11]}
+    # check if the initial position and final positions of the particles are both true according to the
+    # above mapping_state_1_to_state_2_dict
+    state_1_index = separate_by_state_2(state_1)
+    state_2_index = separate_by_state_2(state_2)
     fidelityInformation = []
     fidelitySummaryText = ""
 
@@ -129,4 +163,3 @@ def truncateFinalW(final_W):
 #                 break
 
 #     print(time_array, cumulative_time_array, name_array[targetIndex])
-    

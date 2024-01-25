@@ -49,6 +49,7 @@ def create_system(protocol_parameter_dict, domain = None):
         _p = Protocol(n_th_comp_time_array, n_th_comp_protocol_parameter_array)
         comp_protocol_array.append(_p)
     comp_protocol = Compound_Protocol(comp_protocol_array)
+    comp_protocol.protocol_array  = comp_protocol_array
 
     return storage_protocol, comp_protocol
 
@@ -172,6 +173,13 @@ def get_potential_shot_at_different_t(simRunner, protocol_parameter_dict, timeSt
     def drawParameterGraphs(fig, ax, vmin, vmax):
         # vmin, vmax = 0, 0
         modified_manual_domain = [(manual_domain[0][1], manual_domain[0][0]), (manual_domain[1][1], manual_domain[1][0])]
+        plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
+
         for i, t in enumerate(timeSeries):
             row = i // numberOfColumns
             column = i % numberOfColumns
@@ -208,9 +216,15 @@ def get_potential_shot_at_different_t(simRunner, protocol_parameter_dict, timeSt
                 subplot.set_aspect(1)
 
                 if len(subplot_title_array) > 0:
-                    subplot.set_title(f"t = {t:.3g}, " + ", ".join(subplot_title_array[i]))
+                    # subplot.set_title(f"t = {t:.3g}, " + ", ".join(subplot_title_array[i]))
+                    pass
                 else:
-                    subplot.set_title(f"t = {t:.3g}")
+                    pass
+                    # subplot.set_title(f"t = {t:.3g}")
+                subplot.tick_params(axis='x', labelsize=13 )
+
+                subplot.set_xlabel(r"$\varphi_1$", fontsize=15)
+                subplot.set_ylabel(r"$\varphi_2$", fontsize=15)
                 out = subplot.contourf(X, Y, U, contours, vmin = vmin, vmax = vmax)
 
                 # cfqr.system.protocol.get_params(0)
@@ -225,7 +239,14 @@ def get_potential_shot_at_different_t(simRunner, protocol_parameter_dict, timeSt
 
 
 def get_potential_shot_at_different_t_1D(simRunner, protocol_parameter_dict, timeStep = None, axis1 = 0, axis2 = 1, targetAxis = 0, cutlineDirection = "v", cutlineValue = 0, contours=10, resolution = 200, manual_domain=None, slice_values = None, surface = False, cbar=False, numberOfColumns = 3, vmin = None, vmax = None):
-    # print(protocol_parameter_dict)
+    """
+    cutlineDirection: vertical or horizontal cutline
+    cutlineValue: the position of the cutline
+    for example, cutlineDirection = 'v' and cutlineValue = '3' mean the cutline is x = 3.
+
+    resolution: resolution of the contour plot
+    """
+
     # to figure out which parameter has changed, and which have not been changed.
     changing_parameter_key = [key for key, value in protocol_parameter_dict.items() \
                             if len(set(value)) != 1]
@@ -337,7 +358,84 @@ def get_potential_shot_at_different_t_1D(simRunner, protocol_parameter_dict, tim
     plt.show()
     return plotResultArray
 
-def plotCutlines(X, Y, U, cutlineDirection, cutlineValue, contour_plt = plt, cutline_plt = plt, contours = 5, time = None):
+
+def get_potential_along_a_1D_cutline(simRunner, t = 0, cutlineDirection = "v", cutlineValue = 0, \
+                                     resolution = 100, contours = 5, manual_domain = [[-5, -5], [5, 5]]):
+    # This fuction return an object with the following structure
+    # {
+    #    "contourData": {"X_grid", "Y_grid", "U_grid"},
+    #    "cutlineData": {"culineDirection", "targetAxis", "plotAxis"}
+    # }
+    # you can use this function to obtain the relevant data to plot the contour plot at time t and the
+    # potential along the cutline
+
+    phi_1_dcx_index = protocol_key.index('phi_1_dcx')
+    phi_2_dcx_index = protocol_key.index('phi_2_dcx')
+    phi_1_dc_i = simRunner.protocol.get_params(t)[phi_1_dcx_index]
+    phi_2_dc_i = simRunner.protocol.get_params(t)[phi_2_dcx_index]
+    slice_values = [0, 0, phi_1_dc_i, phi_2_dc_i]
+
+
+    # Call the system lattice methods, this will return (1) the potential energy at each grid point,
+    # (2) the grid in the format of X = [[row1], [row2], [row3], ...] and
+    # Y = [[column1], [column2], [column3], ...]. The axis parameter tells which axes do we want to
+    # use as the x and y .
+    modified_manual_domain = [(manual_domain[0][1], manual_domain[0][0]), \
+                              (manual_domain[1][1], manual_domain[1][0])]
+    U, X_mesh = simRunner.system.lattice(t, resolution, axes=(0, 1),\
+                                manual_domain=modified_manual_domain, slice_values = slice_values)
+    X, Y = X_mesh[0], X_mesh[1]
+
+    # 5. find vmin, vmax, x_min, x_max, y_min and y_max
+    vmin, vmax = np.min(U), np.max(U)
+    x_min, x_max = np.min(X), np.max(X)
+    y_min, y_max = np.min(Y), np.max(Y)
+
+    # 6. call the plot cutline function
+    # plotAxis = the axis that we want to be the variable , targetAxis means to fixed the value of that axis
+    if cutlineDirection == "h":
+        _plotAxis = X
+        _targetAxis = Y
+        _plotU = U
+
+    if cutlineDirection == "v":
+        _plotAxis = Y.T
+        _targetAxis = X.T
+        _plotU = U.T
+
+    plotAxis = _plotAxis[0] # since all the rows are the same, it doesn't matter which one is chosen
+    targetAxis = _targetAxis[:, 0] # to take out the first value of the variable axis.
+
+    # to find out the resolution of the target axis
+    targetRange = (_targetAxis[-1] - _targetAxis[-2])/2
+
+    # to find out the index of the cutline that is the closest to the target value
+    # e.g the resolution may be something like [-0.05, 0.00, 0.05, 0.010, ... ] and my target value is 0.04
+    # I cannot find the index of 0.04 because it does not exist in the array
+    # The best I can do is to find the cutline closest to my target value, which is 0.05 in this case
+    targetIndex = np.where(np.abs(targetAxis - cutlineValue) <= targetRange)[0][0]
+
+    targetU = _plotU[targetIndex]
+
+    return X, Y, U, cutlineDirection, _targetAxis, _plotAxis
+
+    return  {
+        "contourData": {"X_grid": X, "Y_grid": Y, "U_grid": U},
+        "cutlineData": {"culineDirection": cutlineDirection, "targetAxis": _targetAxis, "plotAxis": _plotAxis}
+    }
+
+
+def plotCutlines(X, Y, U, cutlineDirection, cutlineValue = 0, contour_plt = plt, cutline_plt = plt, contours = 5, time = None, showGraph = None):
+    """
+    X = all the rows of the mesh
+    Y = all the columns of the mesh
+
+    cutlineDirection: vertical or horizontal cutline
+    cutlineValue: the position of the cutline
+    for example, cutlineDirection = 'v' and cutlineValue = '3' mean the cutline is x = 3.
+
+    resolution: resolution of the contour plot
+    """
     if cutlineDirection == "h":
         _plotAxis = X
         _targetAxis = Y
@@ -356,15 +454,18 @@ def plotCutlines(X, Y, U, cutlineDirection, cutlineValue, contour_plt = plt, cut
     targetIndex = np.where(np.abs(targetAxis - cutlineValue) <= targetRange)[0][0]
     targetU = _plotU[targetIndex]
     # print(targetAxis, targetIndex, targetU)
-    cont = contour_plt.contourf(X, Y, U,  contours)
+    if showGraph:
+        cont = contour_plt.contourf(X, Y, U,  contours)
 
-    if cutlineDirection == "h":
-        contour_plt.hlines(y = _targetAxis[targetIndex], xmin = np.min(_plotAxis), xmax = np.max(_plotAxis), colors= "red")
-    if cutlineDirection == "v":
-        contour_plt.vlines(x = _targetAxis[targetIndex], ymin = np.min(_plotAxis), ymax = np.max(_plotAxis), colors= "red")
-    # _plt.show()
+        if cutlineDirection == "h":
+            contour_plt.hlines(y = _targetAxis[targetIndex], xmin = np.min(_plotAxis), xmax = np.max(_plotAxis), colors= "red")
+        if cutlineDirection == "v":
+            contour_plt.vlines(x = _targetAxis[targetIndex], ymin = np.min(_plotAxis), ymax = np.max(_plotAxis), colors= "red")
+        # _plt.show()
 
-    cutline_plt.scatter(plotAxis, targetU)
+        cutline_plt.scatter(plotAxis, targetU)
+    else:
+        plt.close()
     return {
         "contour_plot": {"X": X, "Y": Y, "U": U, "contours": contours, "time": time},
         "cutline_plot": {"plotAxis": plotAxis, "targetU": targetU, "time": time, "cutlineDirection": cutlineDirection, "cutlineValue": cutlineValue}
